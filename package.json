@@ -1,0 +1,17 @@
+{
+  "name": "nodejs-cicd",
+  "version": "1.0.0",
+  "description": "A simple Node.js app for CI/CD",
+  "main": "node.js",
+  "scripts": {
+    "start": "node node.js",
+    "test": "echo 'Running tests...' && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "mocha": "^9.0.0",
+    "chai": "^4.3.4"
+  }
+}
