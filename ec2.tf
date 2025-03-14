@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "node_sg" {
-  name        = "node-app-sg-${formatdate("YYYYMMDDhhmmss", timestamp())}" # Unique name
+  name        = "node-app-sg"
   description = "Allow HTTP, HTTPS, and SSH"
   vpc_id      = "vpc-026554c7bfd96ae09"
 
@@ -80,6 +80,12 @@ resource "aws_instance" "node_app" {
   tags = {
     Name = "node.js"
   }
+}
+
+# Write the public IP to a file
+resource "local_file" "public_ip" {
+  filename = "public_ip.txt"
+  content  = aws_instance.node_app.public_ip
 }
 
 # Output the public IP of the EC2 instance
