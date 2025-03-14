@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "node_sg" {
-  name        = "node-app-sg-${formatdate("YYYYMMDDhhmmss", timestamp())}" # Unique name
+  name        = "node-app-sg"
   description = "Allow HTTP, HTTPS, and SSH"
   vpc_id      = "vpc-026554c7bfd96ae09"
 
@@ -24,7 +24,7 @@ resource "aws_security_group" "node_sg" {
   }
 
   ingress {
-    from_port   = 443
+    from_path   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
