@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "node_sg" {
-  name_prefix = "node-app-sg-" 
+  name        = "node-app-sg"
   description = "Allow HTTP and SSH"
   vpc_id      = "vpc-026554c7bfd96ae09"
 
@@ -36,11 +36,11 @@ resource "aws_security_group" "node_sg" {
 }
 
 resource "aws_instance" "node_app" {
-  ami           = "ami-08b5b3a93ed654d19"
+  ami           = "ami-08b5b3a93ed654d19" # Amazon Linux 2 AMI
   instance_type = "t2.micro"
   key_name      = "Bincom"
 
-  security_groups = [aws_security_group.node_sg.name]
+  vpc_security_group_ids = [aws_security_group.node_sg.id]
 
   user_data = <<-EOF
               #!/bin/bash
@@ -49,7 +49,25 @@ resource "aws_instance" "node_app" {
               git clone https://github.com/deadmedusa/nodejsCICD.git /home/ubuntu/nodejsCICD
               cd /home/ubuntu/nodejsCICD
               npm install
-              nohup node app.js > app.log 2>&1 &
+
+              # Create a systemd service for the Node.js app
+              echo "[Unit]
+              Description=Node.js App
+              After=network.target
+
+              [Service]
+              ExecStart=/usr/bin/node /home/ubuntu/nodejsCICD/app.js
+              WorkingDirectory=/home/ubuntu/nodejsCICD
+              User=ubuntu
+              Restart=always
+
+              [Install]
+              WantedBy=multi-user.target" | sudo tee /etc/systemd/system/node-app.service
+
+              # Enable and start the service
+              sudo systemctl daemon-reload
+              sudo systemctl enable node-app
+              sudo systemctl start node-app
               EOF
 
   tags = {
@@ -57,7 +75,7 @@ resource "aws_instance" "node_app" {
   }
 }
 
-# ✅ Only one output block here
+# Output the public IP of the EC2 instance
 output "instance_public_ip" {
   description = "The public IP of the EC2 instance"
   value       = aws_instance.node_app.public_ip
