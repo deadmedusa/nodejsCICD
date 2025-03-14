@@ -40,6 +40,10 @@ jobs:
       with:
         terraform_version: '1.0.0'
 
+    - name: Unset TF_LOG
+      run: |
+        unset TF_LOG
+
     - name: Terraform Init
       run: terraform init
 
@@ -52,7 +56,11 @@ jobs:
     - name: Get Terraform Output
       id: tf_output
       run: |
-        EC2_IP=$(terraform output -raw instance_public_ip)
+        EC2_IP=$(terraform output -raw instance_public_ip 2>/dev/null | tr -d '\n')
+        if [ -z "$EC2_IP" ]; then
+          echo "Failed to get EC2_IP. Exiting."
+          exit 1
+        fi
         echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
 
     - name: Wait for EC2 SSH Availability
