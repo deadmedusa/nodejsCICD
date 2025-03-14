@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "node_sg" {
-  name        = "node-app-sg"
+  name        = "node-app-sg-${formatdate("YYYYMMDDhhmmss", timestamp())}" # Unique name
   description = "Allow HTTP, HTTPS, and SSH"
   vpc_id      = "vpc-026554c7bfd96ae09"
 
