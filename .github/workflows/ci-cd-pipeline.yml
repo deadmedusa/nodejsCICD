@@ -49,6 +49,23 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+    - name: Verify Terraform Apply
+      run: |
+        echo "Terraform output:"
+        terraform output
+
+    - name: Debug Public IP File
+      run: |
+        echo "Checking if public_ip.txt exists..."
+        ls -la
+        if [ -f public_ip.txt ]; then
+          echo "Contents of public_ip.txt:"
+          cat public_ip.txt
+        else
+          echo "public_ip.txt does not exist."
+          exit 1
+        fi
+
     - name: Read Public IP from File
       id: read_ip
       run: |
