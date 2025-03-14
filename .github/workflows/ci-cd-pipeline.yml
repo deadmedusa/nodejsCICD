@@ -49,9 +49,21 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+    - name: Get Terraform Output
+      id: tf_output
+      run: echo "EC2_IP=$(terraform output -raw instance_public_ip)" >> $GITHUB_ENV
+
+    - name: Wait for EC2 SSH Availability
+      run: |
+        while ! ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ubuntu@${EC2_IP} 'echo SSH is ready'; do
+          echo "Waiting for SSH..."
+          sleep 10
+        done
+
     - name: Deploy Node.js app
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'bash -s' < deploy.sh
+        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} 'bash -s' < deploy.sh
       env:
-        EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
+        EC2_IP: ${{ env.EC2_IP }}
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
