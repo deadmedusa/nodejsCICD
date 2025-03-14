@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "node_sg" {
-  name_prefix = "node-app-sg-" # Ensures unique name to avoid duplicates
+  name_prefix = "node-app-sg-" 
   description = "Allow HTTP and SSH"
   vpc_id      = "vpc-026554c7bfd96ae09"
 
@@ -44,20 +44,11 @@ resource "aws_instance" "node_app" {
 
   user_data = <<-EOF
               #!/bin/bash
-              # Update system and install necessary packages
               apt update -y
               apt install -y nodejs npm git
-
-              # Clone the repository
               git clone https://github.com/deadmedusa/nodejsCICD.git /home/ubuntu/nodejsCICD
-
-              # Navigate to the app directory
               cd /home/ubuntu/nodejsCICD
-
-              # Install Node.js dependencies
               npm install
-
-              # Start the Node.js application
               nohup node app.js > app.log 2>&1 &
               EOF
 
@@ -66,12 +57,7 @@ resource "aws_instance" "node_app" {
   }
 }
 
-# Output the instance's public IP address
-output "instance_public_ip" {
-  description = "The public IP of the EC2 instance"
-  value       = aws_instance.node_app.public_ip
-}
-
+# ✅ Only one output block here
 output "instance_public_ip" {
   description = "The public IP of the EC2 instance"
   value       = aws_instance.node_app.public_ip
