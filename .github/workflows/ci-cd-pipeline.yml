@@ -50,10 +50,24 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Get Terraform Output
-      id: tf_output
-      run: |
-        EC2_IP=$(terraform output -raw instance_public_ip | tr -d '\n')
+  id: tf_output
+  run: |
+    # Retry terraform output in case of temporary failures
+    for i in {1..5}; do
+      EC2_IP=$(terraform output -raw instance_public_ip 2>/dev/null | tr -d '\n')
+      if [ -n "$EC2_IP" ]; then
         echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+        break
+      else
+        echo "Attempt $i: Failed to get EC2_IP. Retrying..."
+        sleep 5
+      fi
+    done
+
+    if [ -z "$EC2_IP" ]; then
+      echo "Failed to get EC2_IP after 5 attempts. Exiting."
+      exit 1
+    fi
 
     - name: Wait for EC2 SSH Availability
       run: |
